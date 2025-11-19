@@ -1,7 +1,7 @@
 app = "chrona-backend"
 
 [build]
-  image = "Dockerfile"
+  dockerfile = "Dockerfile"
 
 [env]
   PORT = "8080"
