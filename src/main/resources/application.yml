@@ -17,3 +17,5 @@ chrona:
   jwt:
     secret: ${CHROMA_JWT_SECRET:verysecuresecretmustbe32charsmin}
     expiration-millis: 86400000
+  allowed-origins:
+    - https://chrona-frontend.vercel.app
