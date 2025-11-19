@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://ep-gentle-mode-a4zslnoo-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
+    username: neondb_owner
+    password: npg_b3eQMiOlFz4m
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
+chrona:
+  jwt:
+    secret: ${CHROMA_JWT_SECRET:verysecuresecretmustbe32charsmin}
+    expiration-millis: 86400000
