@@ -25,12 +25,18 @@ public class Task {
     @JoinColumn(name = "parent_id")
     private Task parent;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "phase_id")
+    private Phase phase;
+
     @Column(nullable = false, length = 255)
     private String name;
 
+    @Builder.Default
     @Column(name = "is_billable", nullable = false)
     private Boolean billable = Boolean.TRUE;
 
+    @Builder.Default
     @Column(nullable = false, length = 20)
     private String status = "Ativo";
 

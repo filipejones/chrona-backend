@@ -19,3 +19,4 @@ chrona:
     expiration-millis: 86400000
   allowed-origins:
     - https://chrona-frontend.vercel.app
+    - http://localhost:3000

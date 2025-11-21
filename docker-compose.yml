@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Database Service
+  db:
+    image: postgres:15-alpine
+    container_name: chrona-db
+    environment:
+      POSTGRES_DB: chrona
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - chrona-network
+
+  # Backend Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chrona-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/chrona
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      CHRONA_ALLOWED_ORIGINS: http://localhost:3000
+    depends_on:
+      - db
+    networks:
+      - chrona-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ../chrona-frontend
+      dockerfile: Dockerfile.dev
+    container_name: chrona-frontend
+    ports:
+      - "3000:3000"
+    # volumes:
+    #   - ../chrona-frontend:/app
+    #   - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Fix for hot-reload on some systems
+    user: "1000:1000"
+    depends_on:
+      - backend
+    networks:
+      - chrona-network
+
+volumes:
+  postgres_data:
+
+
+networks:
+  chrona-network:
+    driver: bridge
