@@ -30,8 +30,8 @@ public class SecurityConfig {
     private final ChronaProperties chronaProperties;
 
     public SecurityConfig(JwtService jwtService,
-                          ChronaUserDetailsService userDetailsService,
-                          ChronaProperties chronaProperties) {
+            ChronaUserDetailsService userDetailsService,
+            ChronaProperties chronaProperties) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
         this.chronaProperties = chronaProperties;
@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/actuator/**").permitAll()
+                        .requestMatchers("/auth/login", "/actuator/**", "/api/v1/bootstrap").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

@@ -24,6 +24,9 @@ public class User {
     @Column(name = "password_hash", nullable = false, length = 255)
     private String passwordHash;
 
+    @Column(name = "hourly_rate", precision = 19, scale = 2)
+    private java.math.BigDecimal hourlyRate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;

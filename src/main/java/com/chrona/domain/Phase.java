@@ -28,6 +28,9 @@ public class Phase {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(precision = 19, scale = 2)
+    private java.math.BigDecimal budget;
+
     @Column(nullable = false)
     private boolean standard; // Indicates if this is a system-standard phase
 

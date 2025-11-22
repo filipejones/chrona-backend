@@ -2,8 +2,12 @@ package com.chrona.controller;
 
 import com.chrona.domain.Phase;
 import com.chrona.domain.Project;
+import com.chrona.dto.PhaseFinancialStatusDTO;
 import com.chrona.repository.PhaseRepository;
 import com.chrona.repository.ProjectRepository;
+import com.chrona.service.FinancialService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -12,17 +16,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/phases")
+@RequestMapping("/phases")
 @Validated
+@RequiredArgsConstructor
 public class PhasesController {
 
     private final PhaseRepository phaseRepository;
     private final ProjectRepository projectRepository;
-
-    public PhasesController(PhaseRepository phaseRepository, ProjectRepository projectRepository) {
-        this.phaseRepository = phaseRepository;
-        this.projectRepository = projectRepository;
-    }
+    private final FinancialService financialService;
 
     @GetMapping
     public List<Phase> list(@RequestParam(required = false) Long projectId) {
@@ -68,5 +69,10 @@ public class PhasesController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{id}/financial-status")
+    public ResponseEntity<PhaseFinancialStatusDTO> getFinancialStatus(@PathVariable Long id) {
+        return ResponseEntity.ok(financialService.getPhaseFinancialStatus(id));
     }
 }
