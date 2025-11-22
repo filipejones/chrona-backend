@@ -40,4 +40,12 @@ public class TenantService {
 
         return tenantRepository.save(tenant);
     }
+
+    public java.util.Optional<Tenant> findById(String id) {
+        return tenantRepository.findById(id);
+    }
+
+    public java.util.List<Tenant> findAll() {
+        return tenantRepository.findAll();
+    }
 }

@@ -3,19 +3,20 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://ep-gentle-mode-a4zslnoo-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channelBinding=require
-    username: neondb_owner
-    password: npg_b3eQMiOlFz4m
+    url: jdbc:postgresql://localhost:5432/chrona
+    username: postgres
+    password: password
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
   flyway:
     enabled: true
     locations: classpath:db/migration/public
     schemas: public
     default-schema: public
+    baseline-on-migrate: true
 
 
 chrona:
