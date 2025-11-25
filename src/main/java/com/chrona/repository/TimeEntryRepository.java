@@ -8,4 +8,6 @@ public interface TimeEntryRepository extends JpaRepository<TimeEntry, Long> {
     List<TimeEntry> findByProjectId(Long projectId);
 
     List<TimeEntry> findByTaskId(Long taskId);
+
+    java.util.Optional<TimeEntry> findByUserIdAndEndTimeIsNull(Long userId);
 }

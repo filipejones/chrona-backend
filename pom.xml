@@ -95,6 +95,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-hibernate6</artifactId>
+            <version>2.15.3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -102,6 +107,7 @@
         <plugin>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-maven-plugin</artifactId>
+            <version>${spring-boot.version}</version>
             <executions>
                 <execution>
                     <goals>
@@ -109,6 +115,9 @@
                     </goals>
                 </execution>
             </executions>
+            <configuration>
+                <mainClass>com.chrona.ChronaBackendApplication</mainClass>
+            </configuration>
         </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

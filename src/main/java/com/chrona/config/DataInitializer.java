@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 @org.springframework.context.annotation.Profile("!test")
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class DataInitializer implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -44,7 +44,6 @@ public class DataInitializer implements CommandLineRunner {
     private final TenantService tenantService;
 
     @Override
-    @Transactional
     public void run(String... args) {
         if (alreadySetup) {
             return;

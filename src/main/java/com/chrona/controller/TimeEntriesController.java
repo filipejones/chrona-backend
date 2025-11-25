@@ -21,7 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.OffsetDateTime;
 
 @RestController
-@RequestMapping("/api/v1/time-entries")
+// Legacy endpoints kept under /api/v1/legacy/time-entries to avoid clashing with the new time entry controller
+@RequestMapping("/api/v1/legacy/time-entries")
 @Validated
 public class TimeEntriesController {
     private final TimeEntryRepository repository;

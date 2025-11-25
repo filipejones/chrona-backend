@@ -30,6 +30,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && jwtService.validateToken(token)) {
             String subject = jwtService.extractSubject(token);
+            String tenant = jwtService.extractTenant(token);
+            if (tenant != null) {
+                com.chrona.multitenancy.TenantContext.setCurrentTenant(tenant);
+            }
             UserDetails details = userDetailsService.loadUserByUsername(subject);
             var auth = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

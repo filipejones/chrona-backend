@@ -1,0 +1,16 @@
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+
+# Convert line endings for Windows/Linux compatibility and make executable
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+
+# Download dependencies (cached layer)
+RUN ./mvnw dependency:go-offline
+
+# The source code will be mounted via volume in docker-compose
+# Default command
+CMD ./mvnw spring-boot:run

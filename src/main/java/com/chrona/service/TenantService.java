@@ -2,12 +2,19 @@ package com.chrona.service;
 
 import com.chrona.domain.Tenant;
 import com.chrona.repository.TenantRepository;
+import com.chrona.domain.Role;
+import com.chrona.domain.RolePermission;
+import com.chrona.domain.RolePermissionId;
 import org.flywaydb.core.Flyway;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
+@SuppressWarnings("null")
 public class TenantService {
 
     private final TenantRepository tenantRepository;
@@ -81,17 +88,21 @@ public class TenantService {
         com.chrona.domain.Role adminRole = ensureRole("ADMIN", java.util.List.of(
                 "client:create", "client:update", "client:delete",
                 "project:create", "project:update",
-                "task:create", "task:update", "task:delete",
+                "task:create", "task:update", "task:delete", "task:edit", "task:archive",
                 "time-entry:create", "time-entry:update", "time-entry:delete",
                 "timesheet-period:submit", "timesheet-period:approve", "timesheet-period:reject",
                 "settings:update", "role:create", "role:update", "role:delete",
-                "user:role"));
+                "user:role",
+                "phase:create", "phase:update", "phase:delete",
+                "expense:create", "expense:delete"));
 
         ensureRole("MANAGER", java.util.List.of(
                 "client:update",
-                "project:update", "task:update",
+                "project:update", "task:update", "task:edit", "task:archive",
                 "time-entry:update",
-                "timesheet-period:approve"));
+                "timesheet-period:approve",
+                "phase:create", "phase:update", "phase:delete",
+                "expense:create", "expense:delete"));
 
         ensureRole("TIMEKEEPER", java.util.List.of(
                 "time-entry:create", "time-entry:update",
@@ -118,14 +129,28 @@ public class TenantService {
         }
     }
 
-    private com.chrona.domain.Role ensureRole(String name, java.util.List<String> permissions) {
-        return roleRepository.findByName(name).orElseGet(() -> {
-            com.chrona.domain.Role role = com.chrona.domain.Role.builder()
-                    .name(name)
-                    .build();
+    private Role ensureRole(String name, List<String> permissions) {
+        Role role = roleRepository.findByName(name).orElseGet(() -> roleRepository.save(Role.builder().name(name).build()));
+
+        // garante permissões (mesmo para roles já existentes)
+        Set<RolePermission> current = role.getPermissions() != null ? role.getPermissions() : new LinkedHashSet<>();
+        boolean changed = false;
+        for (String perm : permissions) {
+            boolean exists = current.stream().anyMatch(rp -> rp.getId() != null && perm.equals(rp.getId().getPermissionId()));
+            if (!exists) {
+                RolePermission rp = RolePermission.builder()
+                        .id(new RolePermissionId(role.getId(), perm))
+                        .role(role)
+                        .build();
+                current.add(rp);
+                changed = true;
+            }
+        }
+        if (changed) {
+            role.setPermissions(current);
             role = roleRepository.save(role);
-            return role;
-        });
+        }
+        return role;
     }
 
     public java.util.Optional<Tenant> findById(String id) {
@@ -134,5 +159,33 @@ public class TenantService {
 
     public java.util.List<Tenant> findAll() {
         return tenantRepository.findAll();
+    }
+
+    /**
+     * Resolve o tenant pelo e-mail (varre todos os tenants e procura o usuário).
+     * Retorna o ID do tenant ou vazio se não encontrar.
+     * Lança IllegalStateException se o e-mail existir em mais de um tenant.
+     */
+    public java.util.Optional<String> resolveTenantByEmail(String email) {
+        String foundTenant = null;
+        for (Tenant tenant : tenantRepository.findAll()) {
+            System.out.println("resolveTenantByEmail scanning tenant=" + tenant.getId());
+            try (java.sql.Connection conn = dataSource.getConnection();
+                 java.sql.PreparedStatement ps = conn.prepareStatement("select 1 from users where email = ? limit 1")) {
+                conn.setSchema(tenant.getSchemaName());
+                ps.setString(1, email);
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        if (foundTenant != null && !foundTenant.equals(tenant.getId())) {
+                            throw new IllegalStateException("E-mail presente em múltiplos tenants");
+                        }
+                        foundTenant = tenant.getId();
+                    }
+                }
+            } catch (java.sql.SQLException e) {
+                throw new RuntimeException("Erro ao resolver tenant por e-mail", e);
+            }
+        }
+        return java.util.Optional.ofNullable(foundTenant);
     }
 }

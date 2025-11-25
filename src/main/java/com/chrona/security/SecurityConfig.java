@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 
 import java.util.List;
 
@@ -46,10 +47,11 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/actuator/**", "/api/v1/bootstrap", "/api/public/**")
+                        .requestMatchers("/auth/login", "/actuator/**", "/api/v1/bootstrap", "/api/public/**", "/api/v1/projects/*/overview")
                         .permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(new com.chrona.multitenancy.TenantFilter(jwtService), SecurityContextHolderFilter.class)
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -60,6 +62,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(chronaProperties.getAllowedOrigins());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        configuration.setExposedHeaders(List.of("X-Tenant-ID", "Authorization"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -10,7 +10,7 @@ public class TenantIdentifierResolver implements CurrentTenantIdentifierResolver
     public String resolveCurrentTenantIdentifier() {
         String tenantId = TenantContext.getCurrentTenant();
         if (tenantId != null) {
-            return tenantId;
+            return "tenant_" + tenantId;
         }
         return "public"; // Default tenant
     }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.transaction.annotation.Transactional;
+
 @RestController
 @RequestMapping("/api/v1")
 public class BootstrapController {
@@ -23,14 +24,14 @@ public class BootstrapController {
     private final BootstrapMapper mapper;
 
     public BootstrapController(ClientRepository clientRepository,
-                               ProjectRepository projectRepository,
-                               TaskRepository taskRepository,
-                               TimeEntryRepository timeEntryRepository,
-                               UserRepository userRepository,
-                               RoleRepository roleRepository,
-                               TimesheetPeriodRepository timesheetPeriodRepository,
-                               OrganizationSettingsRepository settingsRepository,
-                               BootstrapMapper mapper) {
+            ProjectRepository projectRepository,
+            TaskRepository taskRepository,
+            TimeEntryRepository timeEntryRepository,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            TimesheetPeriodRepository timesheetPeriodRepository,
+            OrganizationSettingsRepository settingsRepository,
+            BootstrapMapper mapper) {
         this.clientRepository = clientRepository;
         this.projectRepository = projectRepository;
         this.taskRepository = taskRepository;
@@ -50,10 +51,9 @@ public class BootstrapController {
                 projectRepository.findAll(),
                 taskRepository.findAll(),
                 timeEntryRepository.findAll(),
-                userRepository.findAll(),
-                roleRepository.findAll(),
+                userRepository.findAllWithRoles(),
+                roleRepository.findAllWithPermissions(),
                 timesheetPeriodRepository.findAll(),
-                settingsRepository.findById(1).orElse(null)
-        );
+                settingsRepository.findById(1).orElse(null));
     }
 }

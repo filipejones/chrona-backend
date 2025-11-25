@@ -3,9 +3,16 @@ package com.chrona.controller;
 import com.chrona.domain.Expense;
 import com.chrona.domain.Project;
 import com.chrona.domain.User;
+import com.chrona.domain.Phase;
+import com.chrona.dto.ExpenseRequest;
 import com.chrona.repository.ExpenseRepository;
 import com.chrona.repository.ProjectRepository;
 import com.chrona.repository.UserRepository;
+import com.chrona.repository.PhaseRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -21,46 +28,59 @@ public class ExpensesController {
     private final ExpenseRepository expenseRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final PhaseRepository phaseRepository;
 
     public ExpensesController(ExpenseRepository expenseRepository, ProjectRepository projectRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, PhaseRepository phaseRepository) {
         this.expenseRepository = expenseRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.phaseRepository = phaseRepository;
     }
 
     @GetMapping
-    public List<Expense> list(@RequestParam(required = false) Long projectId) {
+    public List<Expense> list(@RequestParam(required = false) Long projectId,
+                              @RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "100") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("date").descending());
         if (projectId != null) {
-            return expenseRepository.findByProjectId(projectId);
+            return expenseRepository.findByProjectId(projectId, pageable);
         }
-        return expenseRepository.findAll();
+        return expenseRepository.findAll(pageable).getContent();
     }
 
     @PostMapping
-    public ResponseEntity<Expense> create(@RequestBody Expense expense) {
-        if (expense.getProject() == null || expense.getProject().getId() == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        Project project = projectRepository.findById(expense.getProject().getId()).orElse(null);
+    public ResponseEntity<?> create(@RequestBody ExpenseRequest request) {
+        Project project = projectRepository.findById(request.getProjectId()).orElse(null);
         if (project == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Projeto não encontrado.");
         }
-        expense.setProject(project);
 
-        if (expense.getUser() != null && expense.getUser().getId() != null) {
-            User user = userRepository.findById(expense.getUser().getId()).orElse(null);
-            if (user == null) {
-                return ResponseEntity.badRequest().build();
+        User user = userRepository.findById(request.getUserId()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário não encontrado.");
+        }
+
+        Phase phase = null;
+        if (request.getPhaseId() != null) {
+            phase = phaseRepository.findById(request.getPhaseId()).orElse(null);
+            if (phase == null || phase.getProject() == null || !phase.getProject().getId().equals(project.getId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Etapa inválida para o projeto informado.");
             }
-            expense.setUser(user);
-        } else {
-            // Should probably get from SecurityContext, but for now require ID
-            return ResponseEntity.badRequest().build();
         }
 
-        expense.setCreatedAt(LocalDateTime.now());
-        expense.setUpdatedAt(LocalDateTime.now());
+        Expense expense = Expense.builder()
+                .amount(request.getAmount())
+                .date(request.getDate())
+                .description(request.getDescription())
+                .reimbursable(request.isReimbursable())
+                .project(project)
+                .phase(phase)
+                .user(user)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
         return ResponseEntity.ok(expenseRepository.save(expense));
     }
 

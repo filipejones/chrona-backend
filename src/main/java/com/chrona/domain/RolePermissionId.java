@@ -10,6 +10,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class RolePermissionId {
+    @jakarta.persistence.Column(name = "role_id")
     private Long roleId;
+
+    @jakarta.persistence.Column(name = "permission_id")
     private String permissionId;
 }

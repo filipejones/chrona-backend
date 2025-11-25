@@ -38,8 +38,14 @@ public class TimeEntry {
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time")
     private LocalTime endTime;
+
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
@@ -52,6 +58,7 @@ public class TimeEntry {
     @Column(name = "tag")
     private List<String> tags;
 
+    @Builder.Default
     @Column(nullable = false, length = 20)
     private String status = "DRAFT";
 

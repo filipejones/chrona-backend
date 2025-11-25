@@ -8,6 +8,9 @@ import com.chrona.repository.ProjectRepository;
 import com.chrona.service.FinancialService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/phases")
+@RequestMapping("/api/v1/phases")
 @Validated
 @RequiredArgsConstructor
 public class PhasesController {
@@ -26,11 +29,14 @@ public class PhasesController {
     private final FinancialService financialService;
 
     @GetMapping
-    public List<Phase> list(@RequestParam(required = false) Long projectId) {
+    public List<Phase> list(@RequestParam(required = false) Long projectId,
+                            @RequestParam(defaultValue = "0") int page,
+                            @RequestParam(defaultValue = "100") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         if (projectId != null) {
-            return phaseRepository.findByProjectId(projectId);
+            return phaseRepository.findByProjectId(projectId, pageable);
         }
-        return phaseRepository.findAll();
+        return phaseRepository.findAll(pageable).getContent();
     }
 
     @PostMapping

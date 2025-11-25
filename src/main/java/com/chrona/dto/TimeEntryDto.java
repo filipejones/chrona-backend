@@ -7,17 +7,19 @@ import java.time.LocalTime;
 import java.util.List;
 
 public record TimeEntryDto(Long id,
-                           Long userId,
-                           String userName,
-                           Long projectId,
-                           Long taskId,
-                           LocalDate workDate,
-                           LocalTime startTime,
-                           LocalTime endTime,
-                           String description,
-                           String notes,
-                           List<String> tags,
-                           String status) {
+        Long userId,
+        String userName,
+        Long projectId,
+        Long taskId,
+        LocalDate workDate,
+        LocalTime startTime,
+        LocalTime endTime,
+        String description,
+        String notes,
+        List<String> tags,
+        String status,
+        Integer durationMinutes,
+        String rejectionReason) {
 
     public static TimeEntryDto from(TimeEntry entry) {
         return new TimeEntryDto(
@@ -32,7 +34,8 @@ public record TimeEntryDto(Long id,
                 entry.getDescription(),
                 entry.getNotes(),
                 entry.getTags(),
-                entry.getStatus()
-        );
+                entry.getStatus(),
+                entry.getDurationMinutes(),
+                entry.getRejectionReason());
     }
 }

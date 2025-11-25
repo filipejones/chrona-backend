@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
+@lombok.Setter
 public class TaskRequest {
     @NotBlank
     private String name;
@@ -15,4 +16,5 @@ public class TaskRequest {
     private Long parentId;
     private Boolean billable;
     private String status;
+    private Long phaseId;
 }

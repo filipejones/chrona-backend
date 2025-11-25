@@ -20,15 +20,21 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: chrona-backend
     ports:
       - "8080:8080"
+      - "5005:5005"
+    command: ./mvnw -DskipTests spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/chrona
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       CHRONA_ALLOWED_ORIGINS: http://localhost:3000
+      JAVA_TOOL_OPTIONS: ""  # evita duplicar jdwp quando já iniciado pelo command
+    volumes:
+      - ./src:/app/src:z
+      - ./pom.xml:/app/pom.xml:z
     depends_on:
       - db
     networks:

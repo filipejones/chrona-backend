@@ -40,6 +40,10 @@ public class Task {
     @Column(nullable = false, length = 20)
     private String status = "Ativo";
 
+    @Builder.Default
+    @Column(name = "estimated_hours", columnDefinition = "NUMERIC(19,2)")
+    private java.math.BigDecimal estimatedHours = java.math.BigDecimal.ZERO;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime createdAt;
 
